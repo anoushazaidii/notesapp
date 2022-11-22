@@ -9,7 +9,10 @@ import 'package:uuid/uuid.dart';
 import '../models/notes.dart';
 
 class addNewNote extends StatefulWidget {
-  const addNewNote({Key? key}) : super(key: key);
+  final bool isUpdate;
+  final Note? note;
+  const addNewNote({Key? key, required this.isUpdate, this.note})
+      : super(key: key);
 
   @override
   State<addNewNote> createState() => _addNewNoteState();
@@ -31,6 +34,22 @@ class _addNewNoteState extends State<addNewNote> {
     Navigator.pop(context);
   }
 
+  void updateNote() {
+    widget.note!.title = titleEditingController.text;
+    widget.note!.content = noteEditingController.text;
+    Provider.of<NoteProvider>(context, listen: false).updateNote(widget.note!);
+    Navigator.pop(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isUpdate) {
+      titleEditingController.text = widget.note!.title!;
+      noteEditingController.text = widget.note!.content!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +59,7 @@ class _addNewNoteState extends State<addNewNote> {
         actions: [
           IconButton(
               onPressed: () {
-                newNote();
+                widget.isUpdate ? updateNote() : newNote();
               },
               icon: Icon(Icons.check))
         ],
@@ -57,7 +76,7 @@ class _addNewNoteState extends State<addNewNote> {
                     focusNode.requestFocus();
                   }
                 },
-                autofocus: true,
+                autofocus: (widget.isUpdate) ? false : true,
                 style: TextStyle(fontSize: 30),
                 decoration: InputDecoration(
                   hintText: "title",

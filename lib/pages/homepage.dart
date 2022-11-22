@@ -23,34 +23,53 @@ class _homePageState extends State<homePage> {
         title: Text("notes app"),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: GridView.builder(
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemCount: noteProvider.notes.length,
-          itemBuilder: (context, index) {
-            Note currentNote = noteProvider.notes[index];
-            return Container(
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 2)),
-              margin: const EdgeInsets.all(5),
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      currentNote.title!,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(currentNote.content!)
-                  ]),
-            );
-          },
-        ),
-      ),
+      body: noteProvider.isLoading == false
+          ? SafeArea(
+              child: (noteProvider.notes.length > 0)
+                  ? GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2),
+                      itemCount: noteProvider.notes.length,
+                      itemBuilder: (context, index) {
+                        Note currentNote = noteProvider.notes[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => addNewNote(
+                                          isUpdate: true,
+                                          note: currentNote,
+                                        )));
+                          },
+                          onLongPress: () {
+                            noteProvider.deleteNote(currentNote);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.grey, width: 2)),
+                            margin: const EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentNote.title!,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(currentNote.content!)
+                                ]),
+                          ),
+                        );
+                      },
+                    )
+                  : Center(child: Text("No notes yet")))
+          : Center(child: CircularProgressIndicator()),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
@@ -58,7 +77,7 @@ class _homePageState extends State<homePage> {
                 context,
                 MaterialPageRoute(
                     fullscreenDialog: true,
-                    builder: (context) => const addNewNote()));
+                    builder: (context) => const addNewNote(isUpdate: false)));
           }),
     );
   }
